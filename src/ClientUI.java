@@ -29,10 +29,15 @@ public class ClientUI {
         textField1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                client.out.println(actionEvent.getActionCommand());
-                //System.out.println(actionEvent.getActionCommand());
-                textPane1.setText(textPane1.getText() + "<= " + actionEvent.getActionCommand() + "\r\n");
                 textField1.setText("");
+                if (!actionEvent.getActionCommand().contains("exit")) {
+                    client.out.println(actionEvent.getActionCommand());
+                    textPane1.setText(textPane1.getText() + "<= " + actionEvent.getActionCommand() + "\r\n");
+                } else {
+                    client.stop();
+                    textField1.setEnabled(false);
+                    serverOnRadioButton.setSelected(false);
+                }
             }
         });
     }

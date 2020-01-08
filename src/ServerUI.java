@@ -31,7 +31,6 @@ public class ServerUI {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 JFrame f = new JFrame("ClientUI");
-                //f.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
                 f.setBounds(100 + 320 + 20, 100, 320, 240);
                 f.setContentPane(new ClientUI().$$$getRootComponent$$$());
                 f.setVisible(true);
@@ -41,10 +40,15 @@ public class ServerUI {
         textField1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                server.out.println(actionEvent.getActionCommand());
-                //System.out.println(actionEvent.getActionCommand());
-                textPane1.setText(textPane1.getText() + "<= " + actionEvent.getActionCommand() + "\r\n");
                 textField1.setText("");
+                if (!actionEvent.getActionCommand().contains("exit")) {
+                    server.out.println(actionEvent.getActionCommand());
+                    textPane1.setText(textPane1.getText() + "<= " + actionEvent.getActionCommand() + "\r\n");
+                } else {
+                    server.stop();
+                    textField1.setEnabled(false);
+                    serverOnRadioButton.setSelected(false);
+                }
             }
         });
     }

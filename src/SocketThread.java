@@ -6,8 +6,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class SocketThread implements Runnable {
-    private final JTextComponent textpane;
-    private Socket socket;
+    final JTextComponent textpane;
+    Socket socket;
+    boolean ping = false;
 
     public SocketThread(Socket socket, JTextComponent textpane) {
         this.socket = socket;
@@ -16,7 +17,7 @@ public class SocketThread implements Runnable {
         LocalDateTime now = LocalDateTime.now();
         String time = dtf.format(now);
 
-        String status = "Connected: "+socket.getRemoteSocketAddress() + " at " + time;
+        String status = "Connected "+socket.getRemoteSocketAddress() + " at " + time;
         textpane.setText(textpane.getText() + status +"\r\n");
         System.out.println(status);
     }
@@ -24,12 +25,19 @@ public class SocketThread implements Runnable {
     @Override
     public void run() {
         try {
-            //PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 if (inputLine.contains("exit")) break;
-                textpane.setText(textpane.getText() + "->" + inputLine + "\r\n");
+                if (!ping) textpane.setText(textpane.getText() + "->" + inputLine + "\r\n");
+
+                if (ping) {
+                    try {Thread.sleep(1000*1);}
+                    catch (InterruptedException e) {e.printStackTrace();}
+                    out.println(inputLine);
+                    textpane.setText(textpane.getText() + "<=" + inputLine + "\r\n");
+                }
             }
             stop();
         }
@@ -40,7 +48,7 @@ public class SocketThread implements Runnable {
         String status="Try closing socket";
         try {
             socket.close();
-            status = "Socket closed by respondent";
+            status = "Socket " + socket.getPort() + " closed by respondent";
         }
         catch (IOException e) {e.printStackTrace();}
         finally {
