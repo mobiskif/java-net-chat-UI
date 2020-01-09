@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 public class ServerUI {
     private JPanel panel1;
@@ -11,6 +14,7 @@ public class ServerUI {
     private JTextField textField1;
     private JComboBox comboBox1;
     private JList list1;
+    private PrintWriter current_out;
     Server server;
 
     public ServerUI() {
@@ -43,7 +47,7 @@ public class ServerUI {
             public void actionPerformed(ActionEvent actionEvent) {
                 textField1.setText("");
                 if (!actionEvent.getActionCommand().contains("exit")) {
-                    server.current_out.println(actionEvent.getActionCommand());
+                    current_out.println(actionEvent.getActionCommand());
                     textPane1.setText(textPane1.getText() + "<= " + actionEvent.getActionCommand() + "\r\n");
                 } else {
                     server.stop();
@@ -52,17 +56,17 @@ public class ServerUI {
                 }
             }
         });
-        comboBox1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-                System.out.println(actionEvent.getActionCommand() + " " + actionEvent.getID() + " " + actionEvent.getModifiers());
-            }
-        });
         comboBox1.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
-                server.setCurrent_out(itemEvent.getItem().toString());
-                //System.out.println(itemEvent.getID() + " = " + itemEvent.getStateChange() + " " + itemEvent.getItem().toString());
+                //server.setCurrent_out(itemEvent.getItem().toString());
+                //server.setCurrent_out((Socket) itemEvent.getItem());
+                try {
+                    if (comboBox1.getItemCount() > 0)
+                        current_out = new PrintWriter(((Socket) itemEvent.getItem()).getOutputStream(), true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

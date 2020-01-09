@@ -1,5 +1,6 @@
-import javax.swing.*;
 import javax.swing.text.JTextComponent;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.io.*;
 import java.time.LocalDateTime;
@@ -7,12 +8,14 @@ import java.time.format.DateTimeFormatter;
 
 public class SocketThread implements Runnable {
     final JTextComponent textpane;
+    private final Method method;
     Socket socket;
     boolean ping = false;
 
-    public SocketThread(Socket socket, JTextComponent textpane) {
+    public SocketThread(Socket socket, JTextComponent textpane, Method method) {
         this.socket = socket;
         this.textpane = textpane;
+        this.method = method;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
         LocalDateTime now = LocalDateTime.now();
         String time = dtf.format(now);
@@ -49,6 +52,14 @@ public class SocketThread implements Runnable {
         try {
             socket.close();
             status = "Socket " + socket.getPort() + " closed by respondent";
+            System.out.println(method.getName() + " " + method.getParameterCount()+ "###");
+            try {
+                method.invoke(new Server());
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
         catch (IOException e) {e.printStackTrace();}
         finally {

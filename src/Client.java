@@ -3,6 +3,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -63,9 +64,12 @@ public class Client {
         try {
             socket = new Socket(host, port);
             out = new PrintWriter(socket.getOutputStream(), true);
-            new Thread(new SocketThread(socket, textpane)).start();
+            Method m = Server.class.getMethod("close_socket", String.class);
+            new Thread(new SocketThread(socket,textpane, m)).start();
+            //new Thread(new SocketThread(socket, textpane)).start();
         }
         catch (IOException e) {System.err.println(e.getMessage());}
+        catch (NoSuchMethodException e) {e.printStackTrace();}
     }
 
     public void stop() {
