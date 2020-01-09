@@ -29,17 +29,17 @@ public class Server implements Runnable {
         listening = true;
         try {
             serverSocket = new ServerSocket(port);
+            while (listening) {
+                try {
+                    Socket socket = serverSocket.accept();
+                    new Thread(new SocketThread(socket, textpane)).start();
+                    combobox.addItem(socket);
+                } catch (IOException e) {
+                    System.err.println("s2: " + e.getMessage());
+                }
+            }
         } catch (IOException e) {
             System.err.println("s1: " + e.getMessage());
-        }
-        while (listening) {
-            try {
-                Socket socket = serverSocket.accept();
-                new Thread(new SocketThread(socket, textpane)).start();
-                combobox.addItem(socket);
-            } catch (IOException e) {
-                System.err.println("s2: " + e.getMessage());
-            }
         }
     }
 
@@ -47,9 +47,11 @@ public class Server implements Runnable {
         listening = false;
         try {
             for (int i = 0; i < combobox.getItemCount(); i++) ((Socket) combobox.getItemAt(i)).close();
-            serverSocket.close();
+            if (serverSocket!=null) {
+                serverSocket.close();
+                System.out.println("ServerSocket closed by request");
+            }
             combobox.removeAllItems();
-            System.out.println("ServerSocket closed by request");
         }
         catch (IOException e) {e.printStackTrace();}
     }
