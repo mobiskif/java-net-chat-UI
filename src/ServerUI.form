@@ -31,6 +31,10 @@
               <text value=""/>
             </properties>
           </component>
+          <component id="fe60d" class="javax.swing.JComboBox" binding="comboBox1" default-binding="true">
+            <constraints/>
+            <properties/>
+          </component>
         </children>
       </toolbar>
       <grid id="fed98" binding="panel2" layout-manager="BorderLayout" hgap="0" vgap="0">

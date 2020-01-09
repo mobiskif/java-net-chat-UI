@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 
 public class ServerUI {
     private JPanel panel1;
@@ -10,6 +9,8 @@ public class ServerUI {
     private JTextPane textPane1;
     private JButton button1;
     private JTextField textField1;
+    private JComboBox comboBox1;
+    private JList list1;
     Server server;
 
     public ServerUI() {
@@ -17,7 +18,7 @@ public class ServerUI {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (serverOnRadioButton.isSelected()) {
-                    server = new Server(textPane1);
+                    server = new Server(textPane1, comboBox1);
                     new Thread(server).start();
                     textField1.setEnabled(true);
                 } else {
@@ -42,13 +43,26 @@ public class ServerUI {
             public void actionPerformed(ActionEvent actionEvent) {
                 textField1.setText("");
                 if (!actionEvent.getActionCommand().contains("exit")) {
-                    server.out.println(actionEvent.getActionCommand());
+                    server.current_out.println(actionEvent.getActionCommand());
                     textPane1.setText(textPane1.getText() + "<= " + actionEvent.getActionCommand() + "\r\n");
                 } else {
                     server.stop();
                     textField1.setEnabled(false);
                     serverOnRadioButton.setSelected(false);
                 }
+            }
+        });
+        comboBox1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                System.out.println(actionEvent.getActionCommand() + " " + actionEvent.getID() + " " + actionEvent.getModifiers());
+            }
+        });
+        comboBox1.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent itemEvent) {
+                server.setCurrent_out(itemEvent.getItem().toString());
+                //System.out.println(itemEvent.getID() + " = " + itemEvent.getStateChange() + " " + itemEvent.getItem().toString());
             }
         });
     }
@@ -82,6 +96,8 @@ public class ServerUI {
         textField1.setEnabled(false);
         textField1.setText("");
         toolBar1.add(textField1);
+        comboBox1 = new JComboBox();
+        toolBar1.add(comboBox1);
         panel2 = new JPanel();
         panel2.setLayout(new BorderLayout(0, 0));
         panel1.add(panel2, BorderLayout.CENTER);
