@@ -31,7 +31,7 @@
               <text value=""/>
             </properties>
           </component>
-          <component id="fe60d" class="javax.swing.JComboBox" binding="comboBox1" default-binding="true">
+          <component id="fe60d" class="javax.swing.JComboBox" binding="combobox" default-binding="true">
             <constraints/>
             <properties/>
           </component>
@@ -47,7 +47,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <component id="113a3" class="javax.swing.JTextPane" binding="textPane1" default-binding="true">
+              <component id="113a3" class="javax.swing.JTextPane" binding="textpane" default-binding="true">
                 <constraints/>
                 <properties>
                   <editable value="false"/>

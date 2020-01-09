@@ -9,21 +9,15 @@ import java.util.ArrayList;
 
 public class Server implements Runnable {
     private final JComboBox combobox;
-    private boolean listening;
+    boolean listening;
     private final JTextComponent textpane;
     private int port;
-    private ServerSocket serverSocket;
+    ServerSocket serverSocket;
 
-    public Server(JTextComponent tp, JComboBox comboBox1) {
+    public Server(JTextComponent tp, JComboBox cb) {
         this.port = 1966;
         this.textpane = tp;
-        this.combobox = comboBox1;
-    }
-
-    public Server() {
-        this.port = 1966;
-        this.textpane = null;
-        this.combobox = null;
+        this.combobox = cb;
     }
 
     public static void main(String[] args) {
@@ -35,35 +29,28 @@ public class Server implements Runnable {
         listening = true;
         try {
             serverSocket = new ServerSocket(port);
-            while (listening) {
-                Socket socket = serverSocket.accept();
-                Method m = Server.class.getMethod("close_socket", Socket.class);
-                new Thread(new SocketThread(socket,textpane, m)).start();
-                combobox.addItem(socket);
-            }
-            stop();
+        } catch (IOException e) {
+            System.err.println("s1: " + e.getMessage());
         }
-        catch (IOException e) {System.err.println(e.getMessage());}
-        catch (NoSuchMethodException e) {e.printStackTrace();}
+        while (listening) {
+            try {
+                Socket socket = serverSocket.accept();
+                new Thread(new SocketThread(socket, textpane)).start();
+                combobox.addItem(socket);
+            } catch (IOException e) {
+                System.err.println("s2: " + e.getMessage());
+            }
+        }
     }
 
     public void stop() {
         listening = false;
-        String status="Try closing socket";
         try {
+            for (int i = 0; i < combobox.getItemCount(); i++) ((Socket) combobox.getItemAt(i)).close();
             serverSocket.close();
-            status = "ServerSocket closed by request";
-            for (int i = 0; i < combobox.getItemCount() ; i++) ((Socket) combobox.getItemAt(i)).close();
+            combobox.removeAllItems();
+            System.out.println("ServerSocket closed by request");
         }
         catch (IOException e) {e.printStackTrace();}
-        finally {
-            combobox.removeAllItems();
-            textpane.setText(textpane.getText() + status + "\r\n");
-            System.out.println(status);
-        }
-    }
-
-    public void close_socket(Socket s) {
-        System.out.println(s + " -------");
     }
 }

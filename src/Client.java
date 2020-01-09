@@ -63,26 +63,26 @@ public class Client {
         listening = true;
         try {
             socket = new Socket(host, port);
-            out = new PrintWriter(socket.getOutputStream(), true);
-            Method m = Server.class.getMethod("close_socket", String.class);
-            new Thread(new SocketThread(socket,textpane, m)).start();
-            //new Thread(new SocketThread(socket, textpane)).start();
+            new Thread(new SocketThread(socket, textpane)).start();
+            try {
+                out = new PrintWriter(socket.getOutputStream(), true);
+            } catch (IOException e) {
+                System.err.println("c4: " + e.getMessage());
+            }
+        } catch (IOException e) {
+            System.err.println("c5: " + e.getMessage());
         }
-        catch (IOException e) {System.err.println(e.getMessage());}
-        catch (NoSuchMethodException e) {e.printStackTrace();}
     }
 
     public void stop() {
-        listening = false;
-        String status = "Try closing socket";
         try {
-            socket.close();
-            status = "ClientSocket closed by request";
-        }
-        catch (IOException e) {e.printStackTrace();}
-        finally {
-            textpane.setText(textpane.getText() + status + "\r\n");
-            System.out.println(status);
+            if (socket!=null) {
+                socket.close();
+                textpane.setText(textpane.getText() + "ClientSocket closed by request" + "\r\n");
+                System.out.println("ClientSocket closed by request");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

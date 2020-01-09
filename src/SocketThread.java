@@ -1,6 +1,4 @@
 import javax.swing.text.JTextComponent;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.*;
 import java.io.*;
 import java.time.LocalDateTime;
@@ -8,14 +6,12 @@ import java.time.format.DateTimeFormatter;
 
 public class SocketThread implements Runnable {
     final JTextComponent textpane;
-    private final Method method;
     Socket socket;
-    boolean ping = false;
+    boolean auto_answer = false;
 
-    public SocketThread(Socket socket, JTextComponent textpane, Method method) {
+    public SocketThread(Socket socket, JTextComponent textpane) {
         this.socket = socket;
         this.textpane = textpane;
-        this.method = method;
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
         LocalDateTime now = LocalDateTime.now();
         String time = dtf.format(now);
@@ -32,10 +28,9 @@ public class SocketThread implements Runnable {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                if (inputLine.contains("exit")) break;
-                if (!ping) textpane.setText(textpane.getText() + "->" + inputLine + "\r\n");
-
-                if (ping) {
+                if (inputLine.contains("bye")) break;
+                textpane.setText(textpane.getText() + "->" + inputLine + "\r\n");
+                if (auto_answer) {
                     try {Thread.sleep(1000*1);}
                     catch (InterruptedException e) {e.printStackTrace();}
                     out.println(inputLine);
@@ -44,28 +39,16 @@ public class SocketThread implements Runnable {
             }
             stop();
         }
-        catch (IOException e) {System.err.println(e.getMessage());}
+        catch (IOException e) {System.err.println("t6: "+e.getMessage());}
     }
 
     public void stop() {
-        String status="Try closing socket";
         try {
             socket.close();
-            status = "Socket " + socket.getPort() + " closed by respondent";
-            System.out.println(method.getName() + " " + method.getParameterCount()+ "###");
-            try {
-                method.invoke(new Server());
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
+            textpane.setText(textpane.getText() + "Socket " + socket.getPort() + " closed by respondent" + "\r\n");
+            System.out.println("Socket " + socket.getPort() + " closed by respondent");
         }
         catch (IOException e) {e.printStackTrace();}
-        finally {
-            textpane.setText(textpane.getText() + status + "\r\n");
-            System.out.println(status);
-        }
     }
 
 }
