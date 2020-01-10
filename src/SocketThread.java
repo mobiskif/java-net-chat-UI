@@ -1,14 +1,11 @@
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-
-import javax.swing.text.JTextComponent;
 import java.net.*;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class SocketThread implements Runnable, Observable {
-    //final JTextComponent textpane;
     Socket socket;
     boolean auto_answer = false;
     private InvalidationListener listener;
@@ -16,36 +13,30 @@ public class SocketThread implements Runnable, Observable {
 
     public SocketThread(Socket socket) {
         this.socket = socket;
-        //this.textpane = textpane;
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
-        LocalDateTime now = LocalDateTime.now();
-        String time = dtf.format(now);
-
-        if (listener!=null) {
-            inputLine = "Connected "+socket.getRemoteSocketAddress() + " at " + time;
-            listener.invalidated(this);
-        }
-        else System.out.println("Connected "+socket.getRemoteSocketAddress() + " at " + time);
     }
 
     @Override
     public void run() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
+        LocalDateTime now = LocalDateTime.now();
+        String time = dtf.format(now);
+        if (listener!=null) {
+            inputLine = listener + ": connection width "+socket.getRemoteSocketAddress() + " at " + time;
+            listener.invalidated(this);
+        }
+        else System.out.println(listener + ": connection width "+socket.getRemoteSocketAddress() + " at " + time);
         try {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            //String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 if (inputLine.contains("bye")) break;
-                //textpane.setText(textpane.getText() + "->" + inputLine + "\r\n");
                 if (auto_answer) {
                     try {Thread.sleep(1000*1);}
                     catch (InterruptedException e) {e.printStackTrace();}
                     out.println(inputLine);
-                    //textpane.setText(textpane.getText() + "<=" + inputLine + "\r\n");
                 }
                 if (listener!=null) listener.invalidated(this);
                 else System.out.println(inputLine);
-
             }
             stop();
         }
@@ -56,10 +47,10 @@ public class SocketThread implements Runnable, Observable {
         try {
             socket.close();
             if (listener!=null) {
-                inputLine = "Socket " + socket.getPort() + " closed by respondent";
+                inputLine = listener + ": socket " + socket.getPort() + " closed by respondent";
                 listener.invalidated(this);
             }
-            else System.out.println("Socket " + socket.getPort() + " closed by respondent");
+            else System.out.println(listener + ": socket " + socket.getPort() + " closed by respondent");
         }
         catch (IOException e) {e.printStackTrace();}
     }

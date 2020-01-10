@@ -1,24 +1,28 @@
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class ClientUI {
+public class ClientUI implements InvalidationListener {
     private JPanel panel1;
     private JRadioButton serverOnRadioButton;
     private JPanel panel2;
-    private JTextPane textPane1;
+    private JTextPane textpane;
     private JTextField textField1;
     Client client;
 
     public ClientUI() {
+
         serverOnRadioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (serverOnRadioButton.isSelected()) {
                     String[] args = {"localhost", "1966"};
-                    client = new Client(textPane1, args);
-                    textField1.setEnabled(true);
+                    client = new Client(args);
+                    client.addListener(ClientUI.this);
                 } else {
                     client.stop();
                     textField1.setEnabled(false);
@@ -32,7 +36,7 @@ public class ClientUI {
                 textField1.setText("");
                 if (!actionEvent.getActionCommand().contains("exit")) {
                     client.out.println(actionEvent.getActionCommand());
-                    textPane1.setText(textPane1.getText() + "=> " + actionEvent.getActionCommand() + "\r\n");
+                    textpane.setText(textpane.getText() + "=> " + actionEvent.getActionCommand() + "\r\n");
                 } else {
                     client.stop();
                     textField1.setEnabled(false);
@@ -73,10 +77,10 @@ public class ClientUI {
         panel1.add(panel2, BorderLayout.CENTER);
         final JScrollPane scrollPane1 = new JScrollPane();
         panel2.add(scrollPane1, BorderLayout.CENTER);
-        textPane1 = new JTextPane();
-        textPane1.setEditable(false);
-        textPane1.setEnabled(true);
-        scrollPane1.setViewportView(textPane1);
+        textpane = new JTextPane();
+        textpane.setEditable(false);
+        textpane.setEnabled(true);
+        scrollPane1.setViewportView(textpane);
     }
 
     /**
@@ -86,4 +90,9 @@ public class ClientUI {
         return panel1;
     }
 
+    @Override
+    public void invalidated(Observable observable) {
+        textField1.setEnabled(true);
+        textpane.setText(textpane.getText() + ((Client) observable).inputLine + "\r\n");
+    }
 }

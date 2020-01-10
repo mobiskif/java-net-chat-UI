@@ -9,23 +9,23 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class Client implements InvalidationListener {
-    private boolean listening;
-    private final JTextComponent textpane;
+public class Client implements InvalidationListener, Observable {
     private final String host;
     private final int port;
     PrintWriter out;
     private Socket clientSocket;
+    private InvalidationListener listener;
+    String inputLine;
 
-    public Client(JTextComponent pane, String[] args) {
-        this.textpane = pane;
+
+    public Client(String[] args) {
         this.host = args[0];
         this.port = Integer.parseInt(args[1]);
         run();
     }
 
     public static void main(String[] args) throws IOException {
-        Client client = new Client(new JTextField(), args);
+        Client client = new Client(args);
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         BufferedReader in = new BufferedReader(new InputStreamReader(client.clientSocket.getInputStream()));
 
@@ -34,24 +34,22 @@ public class Client implements InvalidationListener {
             client.out.println(userInput);
             System.out.println("=> " + in.readLine());
         }
-
     }
 
-
     public void run() {
-        listening = true;
         try {
             clientSocket = new Socket(host, port);
             SocketThread ss = new SocketThread(clientSocket);
             ss.addListener(this);
             new Thread(ss).start();
-            try {
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-            } catch (IOException e) {
-                System.err.println("c4: " + e.getMessage());
+            try {out = new PrintWriter(clientSocket.getOutputStream(), true);}
+            catch (IOException e) {
+                if (listener!=null) listener.invalidated(this);
+                else System.err.println(e);
             }
         } catch (IOException e) {
-            System.err.println("c5: " + e.getMessage());
+            if (listener!=null) listener.invalidated(this);
+            else System.err.println(e);
         }
     }
 
@@ -59,15 +57,28 @@ public class Client implements InvalidationListener {
         try {
             if (clientSocket !=null) {
                 clientSocket.close();
-                System.out.println("ClientSocket closed by request");
+                inputLine = "ClientSocket closed by request";
+                if (listener!=null) listener.invalidated(this);
+                else System.out.println(inputLine);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+        catch (IOException e) {e.printStackTrace();}
     }
 
     @Override
     public void invalidated(Observable observable) {
-        textpane.setText(textpane.getText() + "<-" + ((SocketThread) observable).inputLine + "\r\n");
+        inputLine = ((SocketThread) observable).inputLine;
+        if (listener!=null) listener.invalidated(this);
+        else System.out.println(inputLine);
+    }
+
+    @Override
+    public void addListener(InvalidationListener invalidationListener) {
+        this.listener = invalidationListener;
+    }
+
+    @Override
+    public void removeListener(InvalidationListener invalidationListener) {
+
     }
 }

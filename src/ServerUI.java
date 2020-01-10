@@ -1,3 +1,6 @@
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -5,7 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class ServerUI {
+public class ServerUI implements InvalidationListener {
     private JPanel panel1;
     private JRadioButton serverOnRadioButton;
     private JPanel panel2;
@@ -18,6 +21,7 @@ public class ServerUI {
 
     public ServerUI() {
         server = new Server(textpane, combobox);
+        server.addListener(ServerUI.this);
         serverOnRadioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -25,7 +29,7 @@ public class ServerUI {
                     if (server.serverSocket == null || server.serverSocket.isClosed()) {
                         new Thread(server).start();
                     }
-                    textField1.setEnabled(true);
+                    //textField1.setEnabled(true);
                 } else {
                     server.stop();
                     textField1.setEnabled(false);
@@ -37,7 +41,7 @@ public class ServerUI {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 JFrame f = new JFrame("ClientUI");
-                f.setBounds(100 + 320 + 20, 100, 320, 240);
+                f.setBounds(100 + 640 + 20, 100, 320, 240);
                 f.setContentPane(new ClientUI().$$$getRootComponent$$$());
                 f.setVisible(true);
             }
@@ -68,6 +72,12 @@ public class ServerUI {
                 }
             }
         });
+    }
+
+    @Override
+    public void invalidated(Observable observable) {
+        textField1.setEnabled(true);
+        textpane.setText(textpane.getText() + ((Server) observable).inputLine + "\r\n");
     }
 
     {
