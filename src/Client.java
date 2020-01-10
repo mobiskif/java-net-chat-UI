@@ -42,22 +42,19 @@ public class Client implements InvalidationListener, Observable {
             SocketThread ss = new SocketThread(clientSocket);
             ss.addListener(this);
             new Thread(ss).start();
-            try {out = new PrintWriter(clientSocket.getOutputStream(), true);}
-            catch (IOException e) {
-                if (listener!=null) listener.invalidated(this);
-                else System.err.println(e);
-            }
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
         } catch (IOException e) {
+            inputLine = e.getMessage();
             if (listener!=null) listener.invalidated(this);
-            else System.err.println(e);
+            else System.err.println(inputLine);
         }
     }
 
     public void stop() {
         try {
             if (clientSocket !=null) {
-                clientSocket.close();
                 inputLine = "ClientSocket closed by request";
+                clientSocket.close();
                 if (listener!=null) listener.invalidated(this);
                 else System.out.println(inputLine);
             }

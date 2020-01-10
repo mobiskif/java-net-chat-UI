@@ -6,10 +6,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class SocketThread implements Runnable, Observable {
-    Socket socket;
     boolean auto_answer = false;
     private InvalidationListener listener;
     String inputLine;
+    private Socket socket;
 
     public SocketThread(Socket socket) {
         this.socket = socket;
@@ -20,11 +20,9 @@ public class SocketThread implements Runnable, Observable {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
         LocalDateTime now = LocalDateTime.now();
         String time = dtf.format(now);
-        if (listener!=null) {
-            inputLine = listener + ": connection width "+socket.getRemoteSocketAddress() + " at " + time;
-            listener.invalidated(this);
-        }
-        else System.out.println(listener + ": connection width "+socket.getRemoteSocketAddress() + " at " + time);
+        inputLine = listener + ": connection width "+socket.getRemoteSocketAddress() + " at " + time;
+        if (listener!=null) listener.invalidated(this);
+        else System.out.println(inputLine);
         try {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -40,19 +38,25 @@ public class SocketThread implements Runnable, Observable {
             }
             stop();
         }
-        catch (IOException e) {System.err.println("t6: "+e.getMessage());}
+        catch (IOException e) {
+            inputLine = e.getMessage();
+            if (listener!=null) listener.invalidated(this);
+            else System.err.println(inputLine);
+        }
     }
 
     public void stop() {
         try {
+            inputLine = listener + ": socket " + socket.getPort() + " closed by respondent";
             socket.close();
-            if (listener!=null) {
-                inputLine = listener + ": socket " + socket.getPort() + " closed by respondent";
-                listener.invalidated(this);
-            }
-            else System.out.println(listener + ": socket " + socket.getPort() + " closed by respondent");
+            if (listener!=null) listener.invalidated(this);
+            else System.out.println(inputLine);
         }
-        catch (IOException e) {e.printStackTrace();}
+        catch (IOException e) {
+            inputLine = e.getMessage();
+            if (listener!=null) listener.invalidated(this);
+            else System.err.println(inputLine);
+        }
     }
 
     @Override

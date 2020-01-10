@@ -92,7 +92,16 @@ public class ClientUI implements InvalidationListener {
 
     @Override
     public void invalidated(Observable observable) {
-        textField1.setEnabled(true);
-        textpane.setText(textpane.getText() + ((Client) observable).inputLine + "\r\n");
+        String s = ((Client) observable).inputLine;
+        textpane.setText(textpane.getText() + s + "\r\n");
+
+        if (s.contains("closed by respondent") || s == null) {
+            textField1.setEnabled(false);
+            serverOnRadioButton.setSelected(false);
+        }
+        else {
+            textField1.setEnabled(true);
+            serverOnRadioButton.setSelected(true);
+        }
     }
 }

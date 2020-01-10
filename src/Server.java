@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class Server implements Runnable, InvalidationListener, Observable {
     private final JComboBox combobox;
     boolean listening;
-    private final JTextComponent textpane;
+    //private final JTextComponent textpane;
     private int port;
     ServerSocket serverSocket;
     String inputLine;
@@ -21,7 +21,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
 
     public Server(JTextComponent tp, JComboBox cb) {
         this.port = 1966;
-        this.textpane = tp;
+        //this.textpane = tp;
         this.combobox = cb;
     }
 
@@ -42,11 +42,15 @@ public class Server implements Runnable, InvalidationListener, Observable {
                     new Thread(ss).start();
                     combobox.addItem(socket);
                 } catch (IOException e) {
-                    System.err.println("s2: " + e.getMessage());
+                    inputLine = e.getMessage();
+                    if (listener!=null) listener.invalidated(this);
+                    else System.err.println(inputLine);
                 }
             }
         } catch (IOException e) {
-            System.err.println("s1: " + e.getMessage());
+            inputLine = e.getMessage();
+            if (listener!=null) listener.invalidated(this);
+            else System.err.println(inputLine);
         }
     }
 
@@ -55,13 +59,18 @@ public class Server implements Runnable, InvalidationListener, Observable {
         try {
             for (int i = 0; i < combobox.getItemCount(); i++) ((Socket) combobox.getItemAt(i)).close();
             if (serverSocket!=null) {
+                inputLine = "ServerSocket closed by request";
                 serverSocket.close();
-                textpane.setText(textpane.getText() + "ServerSocket closed by request" + "\r\n");
-                System.out.println("ServerSocket closed by request");
+                if (listener!=null) listener.invalidated(this);
+                else System.out.println(inputLine);
             }
             combobox.removeAllItems();
         }
-        catch (IOException e) {e.printStackTrace();}
+        catch (IOException e) {
+            inputLine = e.getMessage();
+            if (listener!=null) listener.invalidated(this);
+            else System.err.println(inputLine);
+        }
     }
 
     @Override

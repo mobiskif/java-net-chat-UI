@@ -41,7 +41,7 @@ public class ServerUI implements InvalidationListener {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 JFrame f = new JFrame("ClientUI");
-                f.setBounds(100 + 640 + 20, 100, 320, 240);
+                f.setBounds(100 + 640 + 20, 100, 320, 320);
                 f.setContentPane(new ClientUI().$$$getRootComponent$$$());
                 f.setVisible(true);
             }
