@@ -49,7 +49,7 @@ public class ServerUI {
                 textField1.setText("");
                 if (!actionEvent.getActionCommand().contains("exit")) {
                     current_out.println(actionEvent.getActionCommand());
-                    textpane.setText(textpane.getText() + "<= " + actionEvent.getActionCommand() + "\r\n");
+                    textpane.setText(textpane.getText() + "=> " + actionEvent.getActionCommand() + "\r\n");
                 } else {
                     server.stop();
                     textField1.setEnabled(false);

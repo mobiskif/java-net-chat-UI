@@ -21,9 +21,11 @@ public class SocketThread implements Runnable, Observable {
         LocalDateTime now = LocalDateTime.now();
         String time = dtf.format(now);
 
-        String status = "Connected "+socket.getRemoteSocketAddress() + " at " + time;
-        //textpane.setText(textpane.getText() + status +"\r\n");
-        System.out.println(status);
+        if (listener!=null) {
+            inputLine = "Connected "+socket.getRemoteSocketAddress() + " at " + time;
+            listener.invalidated(this);
+        }
+        System.out.println("Connected "+socket.getRemoteSocketAddress() + " at " + time);
     }
 
     @Override
@@ -51,7 +53,10 @@ public class SocketThread implements Runnable, Observable {
     public void stop() {
         try {
             socket.close();
-            //textpane.setText(textpane.getText() + "Socket " + socket.getPort() + " closed by respondent" + "\r\n");
+            if (listener!=null) {
+                inputLine = "Socket " + socket.getPort() + " closed by respondent";
+                listener.invalidated(this);
+            }
             System.out.println("Socket " + socket.getPort() + " closed by respondent");
         }
         catch (IOException e) {e.printStackTrace();}
