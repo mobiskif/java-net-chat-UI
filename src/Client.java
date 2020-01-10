@@ -1,3 +1,6 @@
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.io.BufferedReader;
@@ -8,7 +11,7 @@ import java.lang.reflect.Method;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class Client {
+public class Client implements InvalidationListener {
     private boolean listening;
     private final JTextComponent textpane;
     private final String host;
@@ -41,7 +44,9 @@ public class Client {
         listening = true;
         try {
             socket = new Socket(host, port);
-            new Thread(new SocketThread(socket, textpane)).start();
+            SocketThread ss = new SocketThread(socket);
+            ss.addListener(this);
+            new Thread(ss).start();
             try {
                 out = new PrintWriter(socket.getOutputStream(), true);
             } catch (IOException e) {
@@ -62,5 +67,10 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void invalidated(Observable observable) {
+        textpane.setText(textpane.getText() + "<-" + ((SocketThread) observable).inputLine + "\r\n");
     }
 }

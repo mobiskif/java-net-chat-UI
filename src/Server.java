@@ -35,7 +35,7 @@ public class Server implements Runnable, InvalidationListener {
             while (listening) {
                 try {
                     Socket socket = serverSocket.accept();
-                    SocketThread ss = new SocketThread(socket, textpane);
+                    SocketThread ss = new SocketThread(socket);
                     ss.addListener(this);
                     new Thread(ss).start();
                     combobox.addItem(socket);
@@ -63,6 +63,7 @@ public class Server implements Runnable, InvalidationListener {
 
     @Override
     public void invalidated(Observable observable) {
-        System.out.println("== invalidated ==" + observable);
+        //System.out.println("== invalidated ==" + observable);
+        textpane.setText(textpane.getText() + "<-" + ((SocketThread) observable).inputLine + "\r\n");
     }
 }
