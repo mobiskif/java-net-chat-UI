@@ -1,3 +1,6 @@
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.io.IOException;
@@ -7,7 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class Server implements Runnable {
+public class Server implements Runnable, InvalidationListener {
     private final JComboBox combobox;
     boolean listening;
     private final JTextComponent textpane;
@@ -32,7 +35,9 @@ public class Server implements Runnable {
             while (listening) {
                 try {
                     Socket socket = serverSocket.accept();
-                    new Thread(new SocketThread(socket, textpane)).start();
+                    SocketThread ss = new SocketThread(socket, textpane);
+                    ss.addListener(this);
+                    new Thread(ss).start();
                     combobox.addItem(socket);
                 } catch (IOException e) {
                     System.err.println("s2: " + e.getMessage());
@@ -54,5 +59,10 @@ public class Server implements Runnable {
             combobox.removeAllItems();
         }
         catch (IOException e) {e.printStackTrace();}
+    }
+
+    @Override
+    public void invalidated(Observable observable) {
+        System.out.println("== invalidated ==" + observable);
     }
 }

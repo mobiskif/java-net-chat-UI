@@ -1,13 +1,17 @@
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+
 import javax.swing.text.JTextComponent;
 import java.net.*;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class SocketThread implements Runnable {
+public class SocketThread implements Runnable, Observable {
     final JTextComponent textpane;
     Socket socket;
     boolean auto_answer = false;
+    private InvalidationListener listener;
 
     public SocketThread(Socket socket, JTextComponent textpane) {
         this.socket = socket;
@@ -36,6 +40,7 @@ public class SocketThread implements Runnable {
                     out.println(inputLine);
                     textpane.setText(textpane.getText() + "<=" + inputLine + "\r\n");
                 }
+                if (listener!=null) listener.invalidated(this);
             }
             stop();
         }
@@ -51,4 +56,13 @@ public class SocketThread implements Runnable {
         catch (IOException e) {e.printStackTrace();}
     }
 
+    @Override
+    public void addListener(InvalidationListener invalidationListener) {
+        this.listener = invalidationListener;
+    }
+
+    @Override
+    public void removeListener(InvalidationListener invalidationListener) {
+
+    }
 }
