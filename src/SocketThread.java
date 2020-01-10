@@ -25,7 +25,7 @@ public class SocketThread implements Runnable, Observable {
             inputLine = "Connected "+socket.getRemoteSocketAddress() + " at " + time;
             listener.invalidated(this);
         }
-        System.out.println("Connected "+socket.getRemoteSocketAddress() + " at " + time);
+        else System.out.println("Connected "+socket.getRemoteSocketAddress() + " at " + time);
     }
 
     @Override
@@ -44,6 +44,8 @@ public class SocketThread implements Runnable, Observable {
                     //textpane.setText(textpane.getText() + "<=" + inputLine + "\r\n");
                 }
                 if (listener!=null) listener.invalidated(this);
+                else System.out.println(inputLine);
+
             }
             stop();
         }
@@ -57,7 +59,7 @@ public class SocketThread implements Runnable, Observable {
                 inputLine = "Socket " + socket.getPort() + " closed by respondent";
                 listener.invalidated(this);
             }
-            System.out.println("Socket " + socket.getPort() + " closed by respondent");
+            else System.out.println("Socket " + socket.getPort() + " closed by respondent");
         }
         catch (IOException e) {e.printStackTrace();}
     }

@@ -63,7 +63,6 @@ public class Server implements Runnable, InvalidationListener {
 
     @Override
     public void invalidated(Observable observable) {
-        //System.out.println("== invalidated ==" + observable);
         textpane.setText(textpane.getText() + "<-" + ((SocketThread) observable).inputLine + "\r\n");
     }
 }

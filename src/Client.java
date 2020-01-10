@@ -7,9 +7,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.net.Socket;
-import java.net.UnknownHostException;
 
 public class Client implements InvalidationListener {
     private boolean listening;
@@ -17,7 +15,7 @@ public class Client implements InvalidationListener {
     private final String host;
     private final int port;
     PrintWriter out;
-    private Socket socket;
+    private Socket clientSocket;
 
     public Client(JTextComponent pane, String[] args) {
         this.textpane = pane;
@@ -29,7 +27,7 @@ public class Client implements InvalidationListener {
     public static void main(String[] args) throws IOException {
         Client client = new Client(new JTextField(), args);
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-        BufferedReader in = new BufferedReader(new InputStreamReader(client.socket.getInputStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(client.clientSocket.getInputStream()));
 
         String userInput;
         while ((userInput = stdIn.readLine()) != null) {
@@ -43,12 +41,12 @@ public class Client implements InvalidationListener {
     public void run() {
         listening = true;
         try {
-            socket = new Socket(host, port);
-            SocketThread ss = new SocketThread(socket);
+            clientSocket = new Socket(host, port);
+            SocketThread ss = new SocketThread(clientSocket);
             ss.addListener(this);
             new Thread(ss).start();
             try {
-                out = new PrintWriter(socket.getOutputStream(), true);
+                out = new PrintWriter(clientSocket.getOutputStream(), true);
             } catch (IOException e) {
                 System.err.println("c4: " + e.getMessage());
             }
@@ -59,9 +57,8 @@ public class Client implements InvalidationListener {
 
     public void stop() {
         try {
-            if (socket!=null) {
-                socket.close();
-                textpane.setText(textpane.getText() + "ClientSocket closed by request" + "\r\n");
+            if (clientSocket !=null) {
+                clientSocket.close();
                 System.out.println("ClientSocket closed by request");
             }
         } catch (IOException e) {
