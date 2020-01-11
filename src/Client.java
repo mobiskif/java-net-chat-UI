@@ -12,9 +12,9 @@ import java.net.Socket;
 public class Client implements InvalidationListener, Observable {
     private final String host;
     private final int port;
-    PrintWriter out;
-    private Socket clientSocket;
     private InvalidationListener listener;
+    private Socket clientSocket;
+    PrintWriter out;
     String inputLine;
 
 

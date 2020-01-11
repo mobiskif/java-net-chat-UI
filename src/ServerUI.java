@@ -20,7 +20,8 @@ public class ServerUI implements InvalidationListener {
     Server server;
 
     public ServerUI() {
-        server = new Server(textpane, combobox);
+        String[] args = {"localhost", "1966"};
+        server = new Server(args);
         server.addListener(ServerUI.this);
         serverOnRadioButton.addActionListener(new ActionListener() {
             @Override
@@ -29,7 +30,6 @@ public class ServerUI implements InvalidationListener {
                     if (server.serverSocket == null || server.serverSocket.isClosed()) {
                         new Thread(server).start();
                     }
-                    //textField1.setEnabled(true);
                 } else {
                     server.stop();
                     textField1.setEnabled(false);
@@ -61,22 +61,28 @@ public class ServerUI implements InvalidationListener {
                 }
             }
         });
+
         combobox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
-                try {
+                //try {
                     if (combobox.getItemCount() > 0)
-                        current_out = new PrintWriter(((Socket) itemEvent.getItem()).getOutputStream(), true);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                        //current_out = new PrintWriter(((Socket) itemEvent.getItem()).getOutputStream(), true);
+                        current_out = (PrintWriter) itemEvent.getItem();
+                //} catch (IOException e) { e.printStackTrace(); }
             }
         });
     }
 
     @Override
     public void invalidated(Observable observable) {
+        Server s = ((Server) observable);
         textField1.setEnabled(true);
+        combobox.removeAllItems();
+        for (PrintWriter pw : s.outs
+        ) {
+            combobox.addItem(pw);
+        }
         textpane.setText(textpane.getText() + ((Server) observable).inputLine + "\r\n");
     }
 

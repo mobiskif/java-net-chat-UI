@@ -1,32 +1,28 @@
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 
-import javax.swing.*;
-import javax.swing.text.JTextComponent;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class Server implements Runnable, InvalidationListener, Observable {
-    private final JComboBox combobox;
     boolean listening;
-    //private final JTextComponent textpane;
-    private int port;
-    ServerSocket serverSocket;
-    String inputLine;
+    private final String host;
+    private final int port;
     private InvalidationListener listener;
+    ServerSocket serverSocket;
+    ArrayList<PrintWriter> outs = new ArrayList<PrintWriter>();
+    String inputLine;
 
-    public Server(JTextComponent tp, JComboBox cb) {
-        this.port = 1966;
-        //this.textpane = tp;
-        this.combobox = cb;
+    public Server(String[] args) {
+        this.host = args[0];
+        this.port = Integer.parseInt(args[1]);
     }
 
     public static void main(String[] args) {
-        new Thread(new Server(new JTextField(), new JComboBox())).start();
+        new Thread(new Server(args)).start();
     }
 
     @Override
@@ -40,7 +36,10 @@ public class Server implements Runnable, InvalidationListener, Observable {
                     SocketThread ss = new SocketThread(socket);
                     ss.addListener(this);
                     new Thread(ss).start();
-                    combobox.addItem(socket);
+                    //combobox.addItem(socket);
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    outs.add(out);
+                    if (listener!=null) listener.invalidated(this);
                 } catch (IOException e) {
                     inputLine = e.getMessage();
                     if (listener!=null) listener.invalidated(this);
@@ -57,14 +56,19 @@ public class Server implements Runnable, InvalidationListener, Observable {
     public void stop() {
         listening = false;
         try {
-            for (int i = 0; i < combobox.getItemCount(); i++) ((Socket) combobox.getItemAt(i)).close();
+            //for (int i = 0; i < combobox.getItemCount(); i++) ((Socket) combobox.getItemAt(i)).close();
+            for (PrintWriter s: outs
+                 ) {
+                s.close();
+            }
             if (serverSocket!=null) {
                 inputLine = "ServerSocket closed by request";
                 serverSocket.close();
                 if (listener!=null) listener.invalidated(this);
                 else System.out.println(inputLine);
             }
-            combobox.removeAllItems();
+            //combobox.removeAllItems();
+            listener.invalidated(this);
         }
         catch (IOException e) {
             inputLine = e.getMessage();
@@ -78,8 +82,6 @@ public class Server implements Runnable, InvalidationListener, Observable {
         inputLine = ((SocketThread) observable).inputLine;
         if (listener!=null) listener.invalidated(this);
         else System.out.println(inputLine);
-
-        //textpane.setText(textpane.getText() + ((SocketThread) observable).inputLine + "\r\n");
     }
 
     @Override
