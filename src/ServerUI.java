@@ -23,14 +23,12 @@ public class ServerUI implements InvalidationListener {
         String[] args = {"localhost", "1966"};
         server = new Server(args);
         server.addListener(ServerUI.this);
+
         serverOnRadioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (serverOnRadioButton.isSelected()) {
-                    if (server.serverSocket == null || server.serverSocket.isClosed()) {
-                        new Thread(server).start();
-                    }
-                } else {
+                if (serverOnRadioButton.isSelected()) new Thread(server).start();
+                else {
                     server.stop();
                     textField1.setEnabled(false);
                 }
@@ -50,26 +48,16 @@ public class ServerUI implements InvalidationListener {
         textField1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                current_out.println(actionEvent.getActionCommand());
+                textpane.setText(textpane.getText() + "=> " + actionEvent.getActionCommand() + "\r\n");
                 textField1.setText("");
-                if (!actionEvent.getActionCommand().contains("exit")) {
-                    current_out.println(actionEvent.getActionCommand());
-                    textpane.setText(textpane.getText() + "=> " + actionEvent.getActionCommand() + "\r\n");
-                } else {
-                    server.stop();
-                    textField1.setEnabled(false);
-                    serverOnRadioButton.setSelected(false);
-                }
             }
         });
 
         combobox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
-                //try {
-                    if (combobox.getItemCount() > 0)
-                        //current_out = new PrintWriter(((Socket) itemEvent.getItem()).getOutputStream(), true);
-                        current_out = (PrintWriter) itemEvent.getItem();
-                //} catch (IOException e) { e.printStackTrace(); }
+                current_out = (PrintWriter) itemEvent.getItem();
             }
         });
     }
@@ -79,11 +67,8 @@ public class ServerUI implements InvalidationListener {
         Server s = ((Server) observable);
         textField1.setEnabled(true);
         combobox.removeAllItems();
-        for (PrintWriter pw : s.outs
-        ) {
-            combobox.addItem(pw);
-        }
-        textpane.setText(textpane.getText() + ((Server) observable).inputLine + "\r\n");
+        for (PrintWriter pw : s.outs) combobox.addItem(pw);
+        textpane.setText(textpane.getText() + s.inputLine + "\r\n");
     }
 
     {

@@ -26,9 +26,9 @@ public class Client implements InvalidationListener, Observable {
 
     public static void main(String[] args) throws IOException {
         Client client = new Client(args);
+
         BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
         BufferedReader in = new BufferedReader(new InputStreamReader(client.clientSocket.getInputStream()));
-
         String userInput;
         while ((userInput = stdIn.readLine()) != null) {
             client.out.println(userInput);
@@ -51,13 +51,11 @@ public class Client implements InvalidationListener, Observable {
     }
 
     public void stop() {
+        inputLine = "ClientSocket stopped by request";
+        if (listener!=null) listener.invalidated(this);
+        else System.out.println(inputLine);
         try {
-            if (clientSocket !=null) {
-                inputLine = "ClientSocket closed by request";
-                clientSocket.close();
-                if (listener!=null) listener.invalidated(this);
-                else System.out.println(inputLine);
-            }
+            if (clientSocket !=null) clientSocket.close();
         }
         catch (IOException e) {e.printStackTrace();}
     }

@@ -8,13 +8,13 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class Server implements Runnable, InvalidationListener, Observable {
-    boolean listening;
     private final String host;
     private final int port;
     private InvalidationListener listener;
     ServerSocket serverSocket;
     ArrayList<PrintWriter> outs = new ArrayList<PrintWriter>();
     String inputLine;
+    boolean listening;
 
     public Server(String[] args) {
         this.host = args[0];
@@ -28,17 +28,18 @@ public class Server implements Runnable, InvalidationListener, Observable {
     @Override
     public void run() {
         listening = true;
+        inputLine = "ServerSocket started";
+        if (listener!=null) listener.invalidated(this);
+        else System.out.println(inputLine);
         try {
             serverSocket = new ServerSocket(port);
             while (listening) {
                 try {
                     Socket socket = serverSocket.accept();
-                    SocketThread ss = new SocketThread(socket);
-                    ss.addListener(this);
-                    new Thread(ss).start();
-                    //combobox.addItem(socket);
-                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                    outs.add(out);
+                    SocketThread st = new SocketThread(socket);
+                    st.addListener(this);
+                    new Thread(st).start();
+                    outs.add(new PrintWriter(socket.getOutputStream(), true));
                     if (listener!=null) listener.invalidated(this);
                 } catch (IOException e) {
                     inputLine = e.getMessage();
@@ -55,20 +56,12 @@ public class Server implements Runnable, InvalidationListener, Observable {
 
     public void stop() {
         listening = false;
+        inputLine = "ServerSocket stopped by request";
+        if (listener!=null) listener.invalidated(this);
+        else System.out.println(inputLine);
         try {
-            //for (int i = 0; i < combobox.getItemCount(); i++) ((Socket) combobox.getItemAt(i)).close();
-            for (PrintWriter s: outs
-                 ) {
-                s.close();
-            }
-            if (serverSocket!=null) {
-                inputLine = "ServerSocket closed by request";
-                serverSocket.close();
-                if (listener!=null) listener.invalidated(this);
-                else System.out.println(inputLine);
-            }
-            //combobox.removeAllItems();
-            listener.invalidated(this);
+            for (PrintWriter s: outs) s.close();
+            if (serverSocket!=null) serverSocket.close();
         }
         catch (IOException e) {
             inputLine = e.getMessage();
