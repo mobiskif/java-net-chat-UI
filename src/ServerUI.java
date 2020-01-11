@@ -49,7 +49,7 @@ public class ServerUI implements InvalidationListener {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 current_out.println(actionEvent.getActionCommand());
-                textpane.setText(textpane.getText() + "=> " + actionEvent.getActionCommand() + "\r\n");
+                textpane.setText(textpane.getText() + "=> " + actionEvent.getActionCommand() + " \r\n");
                 textField1.setText("");
             }
         });
