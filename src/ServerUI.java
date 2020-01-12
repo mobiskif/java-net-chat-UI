@@ -67,7 +67,13 @@ public class ServerUI implements InvalidationListener {
         Server s = ((Server) observable);
         textField1.setEnabled(true);
         combobox.removeAllItems();
-        for (PrintWriter pw : s.outs) combobox.addItem(pw);
+        for (Socket socket : s.sockets) {
+            try {
+                combobox.addItem(new PrintWriter(socket.getOutputStream(), true));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         textpane.setText(textpane.getText() + s.inputLine + "\r\n");
     }
 

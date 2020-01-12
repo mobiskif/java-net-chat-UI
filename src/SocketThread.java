@@ -9,10 +9,10 @@ public class SocketThread implements Runnable, Observable {
     boolean auto_answer = false;
     private InvalidationListener listener;
     String inputLine;
-    private Socket socket;
+    Socket threadSocket;
 
     public SocketThread(Socket socket) {
-        this.socket = socket;
+        this.threadSocket = socket;
     }
 
     @Override
@@ -20,14 +20,13 @@ public class SocketThread implements Runnable, Observable {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
         LocalDateTime now = LocalDateTime.now();
         String time = dtf.format(now);
-        inputLine = listener + ": connection width "+socket.getRemoteSocketAddress() + " at " + time;
+        inputLine = "Connected "+ threadSocket.getRemoteSocketAddress() + " at " + time;
         if (listener!=null) listener.invalidated(this);
         else System.out.println(inputLine);
         try {
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            PrintWriter out = new PrintWriter(threadSocket.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(threadSocket.getInputStream()));
             while ((inputLine = in.readLine()) != null) {
-                if (inputLine.contains("bye")) break;
                 if (auto_answer) {
                     try {Thread.sleep(1000*1);}
                     catch (InterruptedException e) {e.printStackTrace();}
@@ -46,17 +45,11 @@ public class SocketThread implements Runnable, Observable {
     }
 
     public void stop() {
-        try {
-            inputLine = listener + ": socket " + socket.getPort() + " closed by respondent";
-            socket.close();
-            if (listener!=null) listener.invalidated(this);
-            else System.out.println(inputLine);
-        }
-        catch (IOException e) {
-            inputLine = e.getMessage();
-            if (listener!=null) listener.invalidated(this);
-            else System.err.println(inputLine);
-        }
+        inputLine = "ThreadSocket closed by request";
+        if (listener!=null) listener.invalidated(this);
+        else System.out.println(inputLine);
+        try {threadSocket.close();}
+        catch (IOException e) {e.printStackTrace();}
     }
 
     @Override

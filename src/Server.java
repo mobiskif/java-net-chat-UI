@@ -12,7 +12,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
     private final int port;
     private InvalidationListener listener;
     ServerSocket serverSocket;
-    ArrayList<PrintWriter> outs = new ArrayList<PrintWriter>();
+    ArrayList<Socket> sockets = new ArrayList<Socket>();
     String inputLine;
     boolean listening;
 
@@ -29,51 +29,48 @@ public class Server implements Runnable, InvalidationListener, Observable {
     public void run() {
         listening = true;
         inputLine = "ServerSocket started";
-        if (listener!=null) listener.invalidated(this);
+        if (listener != null) listener.invalidated(this);
         else System.out.println(inputLine);
         try {
             serverSocket = new ServerSocket(port);
             while (listening) {
-                try {
-                    Socket socket = serverSocket.accept();
-                    SocketThread st = new SocketThread(socket);
-                    st.addListener(this);
-                    new Thread(st).start();
-                    outs.add(new PrintWriter(socket.getOutputStream(), true));
-                    if (listener!=null) listener.invalidated(this);
-                } catch (IOException e) {
-                    inputLine = e.getMessage();
-                    if (listener!=null) listener.invalidated(this);
-                    else System.err.println(inputLine);
-                }
+                Socket socket = serverSocket.accept();
+                SocketThread st = new SocketThread(socket);
+                st.addListener(this);
+                new Thread(st).start();
+                sockets.add(socket);
+                //outs.add(new PrintWriter(socket.getOutputStream(), true));
+                //if (listener != null) listener.invalidated(this);
             }
         } catch (IOException e) {
             inputLine = e.getMessage();
-            if (listener!=null) listener.invalidated(this);
+            if (listener != null) listener.invalidated(this);
             else System.err.println(inputLine);
         }
     }
 
     public void stop() {
         listening = false;
-        inputLine = "ServerSocket stopped by request";
-        if (listener!=null) listener.invalidated(this);
+        inputLine = "ServerSocket closed by request";
+        if (listener != null) listener.invalidated(this);
         else System.out.println(inputLine);
         try {
-            for (PrintWriter s: outs) s.close();
-            if (serverSocket!=null) serverSocket.close();
-        }
-        catch (IOException e) {
-            inputLine = e.getMessage();
-            if (listener!=null) listener.invalidated(this);
-            else System.err.println(inputLine);
-        }
+            for (Socket s : sockets) s.close();
+            if (serverSocket != null) serverSocket.close();
+        } catch (IOException e) {e.printStackTrace();}
     }
 
     @Override
     public void invalidated(Observable observable) {
-        inputLine = ((SocketThread) observable).inputLine;
-        if (listener!=null) listener.invalidated(this);
+        SocketThread st = (SocketThread) observable;
+        inputLine = st.inputLine;
+        if (inputLine.contains("closed by"))
+            for (Socket s: sockets)
+                if (st.threadSocket==s) {
+                    sockets.remove(s);
+                    break;
+                }
+        if (listener != null) listener.invalidated(this);
         else System.out.println(inputLine);
     }
 

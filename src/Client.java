@@ -37,6 +37,9 @@ public class Client implements InvalidationListener, Observable {
     }
 
     public void run() {
+        inputLine = "ClientSocket started";
+        if (listener != null) listener.invalidated(this);
+        else System.out.println(inputLine);
         try {
             clientSocket = new Socket(host, port);
             SocketThread ss = new SocketThread(clientSocket);
@@ -51,7 +54,7 @@ public class Client implements InvalidationListener, Observable {
     }
 
     public void stop() {
-        inputLine = "ClientSocket stopped by request";
+        inputLine = "ClientSocket closed by request";
         if (listener!=null) listener.invalidated(this);
         else System.out.println(inputLine);
         try {
