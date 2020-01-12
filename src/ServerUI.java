@@ -48,7 +48,7 @@ public class ServerUI implements InvalidationListener {
         textField1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                current_out.println(actionEvent.getActionCommand());
+                if (current_out != null) current_out.println(actionEvent.getActionCommand());
                 textpane.setText(textpane.getText() + "=> " + actionEvent.getActionCommand() + " \r\n");
                 textField1.setText("");
             }
@@ -57,7 +57,7 @@ public class ServerUI implements InvalidationListener {
         combobox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent itemEvent) {
-                current_out = (PrintWriter) itemEvent.getItem();
+                if (!server.sockets_changed) current_out = (PrintWriter) itemEvent.getItem();
             }
         });
     }
@@ -66,12 +66,18 @@ public class ServerUI implements InvalidationListener {
     public void invalidated(Observable observable) {
         Server s = ((Server) observable);
         textField1.setEnabled(true);
-        combobox.removeAllItems();
-        for (Socket socket : s.sockets) {
-            try {
-                combobox.addItem(new PrintWriter(socket.getOutputStream(), true));
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (s.sockets_changed) {
+            PrintWriter old = current_out;
+            combobox.removeAllItems();
+            for (Socket socket : s.sockets) {
+                try {
+                    combobox.addItem(new PrintWriter(socket.getOutputStream(), true));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                s.sockets_changed = false;
+                current_out = old;
+                if (old == null) current_out = (PrintWriter) combobox.getItemAt(combobox.getItemCount() - 1);
             }
         }
         textpane.setText(textpane.getText() + s.inputLine + "\r\n");

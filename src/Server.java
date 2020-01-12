@@ -15,6 +15,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
     ArrayList<Socket> sockets = new ArrayList<Socket>();
     String inputLine;
     boolean listening;
+    boolean sockets_changed=false;
 
     public Server(String[] args) {
         this.host = args[0];
@@ -39,8 +40,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
                 st.addListener(this);
                 new Thread(st).start();
                 sockets.add(socket);
-                //outs.add(new PrintWriter(socket.getOutputStream(), true));
-                //if (listener != null) listener.invalidated(this);
+                this.sockets_changed = true;
             }
         } catch (IOException e) {
             inputLine = e.getMessage();
@@ -56,7 +56,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
         else System.out.println(inputLine);
         try {
             for (Socket s : sockets) s.close();
-            if (serverSocket != null) serverSocket.close();
+            //if (serverSocket != null) serverSocket.close();
         } catch (IOException e) {e.printStackTrace();}
     }
 
@@ -68,6 +68,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
             for (Socket s: sockets)
                 if (st.threadSocket==s) {
                     sockets.remove(s);
+                    this.sockets_changed = true;
                     break;
                 }
         if (listener != null) listener.invalidated(this);
