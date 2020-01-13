@@ -37,11 +37,7 @@ public class SocketThread implements Runnable, Observable {
             }
             stop();
         }
-        catch (IOException e) {
-            inputLine = e.getMessage();
-            if (listener!=null) listener.invalidated(this);
-            else System.err.println(inputLine);
-        }
+        catch (IOException e) {e.printStackTrace();}
     }
 
     public void stop() {

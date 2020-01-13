@@ -42,11 +42,8 @@ public class Server implements Runnable, InvalidationListener, Observable {
                 sockets.add(socket);
                 this.sockets_changed = true;
             }
-        } catch (IOException e) {
-            inputLine = e.getMessage();
-            if (listener != null) listener.invalidated(this);
-            else System.err.println(inputLine);
-        }
+            serverSocket.close();
+        } catch (IOException e) {e.printStackTrace();}
     }
 
     public void stop() {
@@ -56,8 +53,9 @@ public class Server implements Runnable, InvalidationListener, Observable {
         else System.out.println(inputLine);
         try {
             for (Socket s : sockets) s.close();
-            //if (serverSocket != null) serverSocket.close();
+            sockets_changed=true;
         } catch (IOException e) {e.printStackTrace();}
+
     }
 
     @Override
