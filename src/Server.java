@@ -42,7 +42,6 @@ public class Server implements Runnable, InvalidationListener, Observable {
                 sockets.add(socket);
                 this.sockets_changed = true;
             }
-            serverSocket.close();
         } catch (IOException e) {e.printStackTrace();}
     }
 
@@ -54,6 +53,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
         try {
             for (Socket s : sockets) s.close();
             sockets_changed=true;
+            if (!serverSocket.isClosed()) serverSocket.close();
         } catch (IOException e) {e.printStackTrace();}
 
     }
