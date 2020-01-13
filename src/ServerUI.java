@@ -15,9 +15,10 @@ public class ServerUI implements InvalidationListener {
     private JTextPane textpane;
     private JButton button1;
     private JTextField textField1;
+    Server server;
+
     private JComboBox combobox;
     private PrintWriter current_out;
-    Server server;
 
     public ServerUI() {
         String[] args = {"localhost", "1966"};
@@ -27,7 +28,8 @@ public class ServerUI implements InvalidationListener {
         serverOnRadioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (serverOnRadioButton.isSelected()) new Thread(server).start();
+                if (serverOnRadioButton.isSelected())
+                    new Thread(server).start();
                 else {
                     server.stop();
                     textField1.setEnabled(false);
@@ -64,19 +66,32 @@ public class ServerUI implements InvalidationListener {
 
     @Override
     public void invalidated(Observable observable) {
-        Server s = ((Server) observable);
+        String s = ((Server) observable).inputLine;
+        textpane.setText(textpane.getText() + s + "\r\n");
         textField1.setEnabled(true);
-        if (s.sockets_changed) {
+
+        if (s.contains("closed by")) {
+            for (Socket ss : server.sockets)
+                if (((Server) observable).threadSocket == ss) {
+                    server.sockets.remove(ss);
+                    server.sockets_changed = true;
+                    break;
+                }
+        }
+        else if (s.contains("Connected")) server.sockets_changed = true;
+        if (server.sockets_changed) {
             combobox.removeAllItems();
-            for (Socket socket : s.sockets) {
+            for (Socket socket : server.sockets) {
                 try {
                     combobox.addItem(new PrintWriter(socket.getOutputStream(), true));
-                } catch (IOException e) { e.printStackTrace();  }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            combobox.setSelectedIndex(combobox.getItemCount() - 1);
             current_out = (PrintWriter) combobox.getItemAt(combobox.getItemCount() - 1);
-            s.sockets_changed = false;
+            server.sockets_changed = false;
         }
-        textpane.setText(textpane.getText() + s.inputLine + "\r\n");
     }
 
     {
@@ -127,5 +142,6 @@ public class ServerUI implements InvalidationListener {
     public JComponent $$$getRootComponent$$$() {
         return panel1;
     }
+
 
 }

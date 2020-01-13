@@ -11,16 +11,18 @@ public class ClientUI implements InvalidationListener {
     private JRadioButton serverOnRadioButton;
     private JPanel panel2;
     private JTextPane textpane;
+
     private JTextField textField1;
     Client client;
 
     public ClientUI() {
 
         serverOnRadioButton.addActionListener(new ActionListener() {
+            String[] args = {"localhost", "1966"};
+
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (serverOnRadioButton.isSelected()) {
-                    String[] args = {"localhost", "1966"};
                     client = new Client(args);
                     client.addListener(ClientUI.this);
                 } else {
@@ -38,6 +40,18 @@ public class ClientUI implements InvalidationListener {
                 textField1.setText("");
             }
         });
+    }
+
+    @Override
+    public void invalidated(Observable observable) {
+        String s = ((Client) observable).inputLine;
+        textpane.setText(textpane.getText() + s + "\r\n");
+        textField1.setEnabled(true);
+
+        if (s.contains("Socket closed") || s == null) {
+            textField1.setEnabled(false);
+            serverOnRadioButton.setSelected(false);
+        }
     }
 
     {
@@ -84,18 +98,4 @@ public class ClientUI implements InvalidationListener {
         return panel1;
     }
 
-    @Override
-    public void invalidated(Observable observable) {
-        String s = ((Client) observable).inputLine;
-        textpane.setText(textpane.getText() + s + "\r\n");
-
-        if (s.contains("Socket closed") || s == null) {
-            textField1.setEnabled(false);
-            serverOnRadioButton.setSelected(false);
-        }
-        else {
-            textField1.setEnabled(true);
-            serverOnRadioButton.setSelected(true);
-        }
-    }
 }
