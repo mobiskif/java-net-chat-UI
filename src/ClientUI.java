@@ -33,15 +33,9 @@ public class ClientUI implements InvalidationListener {
         textField1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                if (client.out != null) client.out.println(actionEvent.getActionCommand());
+                textpane.setText(textpane.getText() + "=> " + actionEvent.getActionCommand() + " \r\n");
                 textField1.setText("");
-                if (!actionEvent.getActionCommand().contains("exit")) {
-                    client.out.println(actionEvent.getActionCommand());
-                    textpane.setText(textpane.getText() + "=> " + actionEvent.getActionCommand() + "\r\n");
-                } else {
-                    client.stop();
-                    textField1.setEnabled(false);
-                    serverOnRadioButton.setSelected(false);
-                }
             }
         });
     }
@@ -95,7 +89,7 @@ public class ClientUI implements InvalidationListener {
         String s = ((Client) observable).inputLine;
         textpane.setText(textpane.getText() + s + "\r\n");
 
-        if (s.contains("closed by") || s == null) {
+        if (s.contains("Socket closed") || s == null) {
             textField1.setEnabled(false);
             serverOnRadioButton.setSelected(false);
         }
