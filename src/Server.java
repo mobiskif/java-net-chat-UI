@@ -42,7 +42,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
                 new Thread(st).start();
                 sockets.add(socket);
             }
-        } catch (IOException e) {e.printStackTrace();}
+        } catch (IOException e) {System.err.println(e.getMessage());}
     }
 
     public void stop() {

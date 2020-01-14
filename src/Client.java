@@ -49,11 +49,7 @@ public class Client implements InvalidationListener, Observable {
                 st.addListener(this);
                 new Thread(st).start();
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
-        } catch (IOException e) {
-            inputLine = e.getMessage();
-            if (listener!=null) listener.invalidated(this);
-            else System.err.println(inputLine);
-        }
+        } catch (IOException e) {System.err.println(e.getMessage());}
     }
 
     public void stop() {
