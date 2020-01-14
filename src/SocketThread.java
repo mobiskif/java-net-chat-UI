@@ -24,7 +24,6 @@ public class SocketThread implements Runnable, Observable {
         if (listener!=null) listener.invalidated(this);
         else System.out.println(inputLine);
         try {
-
             PrintWriter out = new PrintWriter(threadSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(threadSocket.getInputStream()));
             while ((inputLine = in.readLine()) != null) {
