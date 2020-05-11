@@ -16,15 +16,15 @@ public class ClientUI implements InvalidationListener {
     Client client;
 
     public ClientUI() {
+        String[] args = {"localhost", "1966"};
+        client = new Client(args);
+        client.addListener(ClientUI.this);
 
         serverOnRadioButton.addActionListener(new ActionListener() {
-            String[] args = {"localhost", "1966"};
-
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 if (serverOnRadioButton.isSelected()) {
-                    client = new Client(args);
-                    client.addListener(ClientUI.this);
+                    new Thread(client).start();
                 } else {
                     client.stop();
                     textField1.setEnabled(false);
@@ -35,8 +35,8 @@ public class ClientUI implements InvalidationListener {
         textField1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (client.out != null) client.out.println(actionEvent.getActionCommand());
                 textpane.setText(textpane.getText() + "=> " + actionEvent.getActionCommand() + " \r\n");
+                client.repeat(actionEvent.getActionCommand());
                 textField1.setText("");
             }
         });

@@ -28,9 +28,9 @@ public class ServerUI implements InvalidationListener {
         serverOnRadioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                if (serverOnRadioButton.isSelected())
+                if (serverOnRadioButton.isSelected()) {
                     new Thread(server).start();
-                else {
+                } else {
                     server.stop();
                     textField1.setEnabled(false);
                 }

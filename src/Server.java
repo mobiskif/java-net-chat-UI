@@ -12,11 +12,12 @@ public class Server implements Runnable, InvalidationListener, Observable {
     private final int port;
     private InvalidationListener listener;
     ServerSocket serverSocket;
-    ArrayList<Socket> sockets = new ArrayList<Socket>();
+    Socket threadSocket;
     String inputLine;
+
+    ArrayList<Socket> sockets = new ArrayList<Socket>();
     boolean listening;
     boolean sockets_changed=false;
-    Socket threadSocket;
 
     public Server(String[] args) {
         this.host = args[0];
@@ -37,9 +38,9 @@ public class Server implements Runnable, InvalidationListener, Observable {
             serverSocket = new ServerSocket(port);
             while (listening) {
                 Socket socket = serverSocket.accept();
-                SocketThread st = new SocketThread(socket);
-                st.addListener(this);
-                new Thread(st).start();
+                    SocketThread st = new SocketThread(socket);
+                    st.addListener(this);
+                    new Thread(st).start();
                 sockets.add(socket);
             }
         } catch (IOException e) {System.err.println(e.getMessage());}
