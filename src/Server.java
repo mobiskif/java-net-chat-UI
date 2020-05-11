@@ -32,7 +32,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
         listening = true;
         inputLine = "ServerSocket started";
         if (listener != null) listener.invalidated(this);
-        else System.out.println(inputLine);
+        System.out.println(getClass().getSimpleName()+" input: "+inputLine);
         try {
             serverSocket = new ServerSocket(port);
             while (listening) {
@@ -49,7 +49,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
         listening = false;
         inputLine = "ServerSocket closed by request";
         if (listener != null) listener.invalidated(this);
-        else System.out.println(inputLine);
+        System.out.println(getClass().getSimpleName()+" input: "+inputLine);
         try {
             for (Socket s : sockets) s.close();
             sockets_changed=true;
@@ -63,7 +63,7 @@ public class Server implements Runnable, InvalidationListener, Observable {
         inputLine = ((SocketThread) observable).inputLine;
         threadSocket = ((SocketThread) observable).threadSocket;
         if (listener!=null) listener.invalidated(this);
-        else System.out.println(inputLine);
+        System.out.println(getClass().getSimpleName()+" input: "+inputLine);
     }
 
     @Override
