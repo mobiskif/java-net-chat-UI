@@ -94,20 +94,6 @@
   <path id="library.javafx.base.classpath">
     <pathelement location="${basedir}/src/javafx.base.jar"/>
   </path>
-  <!-- Register Custom Compiler Taskdefs -->
-  <property name="javac2.home" value="${idea.home}/lib"/>
-  <path id="javac2.classpath">
-    <fileset dir="${javac2.home}">
-      <include name="javac2.jar"/>
-      <include name="jdom.jar"/>
-      <include name="asm-all*.jar"/>
-      <include name="forms-*.jar"/>
-    </fileset>
-  </path>
-  <target name="register.custom.compilers">
-    <taskdef name="javac2" classname="com.intellij.ant.Javac2" classpathref="javac2.classpath"/>
-    <taskdef name="instrumentIdeaExtensions" classname="com.intellij.ant.InstrumentIdeaExtensions" classpathref="javac2.classpath"/>
-  </target>
   
   <!-- Modules -->
   
@@ -170,15 +156,15 @@
   
   <target name="compile.module.netapp" depends="compile.module.netapp.production,compile.module.netapp.tests" description="Compile module netapp"/>
   
-  <target name="compile.module.netapp.production" depends="register.custom.compilers" description="Compile module netapp; production classes">
+  <target name="compile.module.netapp.production" description="Compile module netapp; production classes">
     <mkdir dir="${netapp.output.dir}"/>
-    <javac2 destdir="${netapp.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.netapp}/javac">
+    <javac destdir="${netapp.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.netapp}/javac">
       <compilerarg line="${compiler.args.netapp}"/>
       <bootclasspath refid="netapp.module.bootclasspath"/>
       <classpath refid="netapp.module.production.classpath"/>
       <src refid="netapp.module.sourcepath"/>
       <patternset refid="excluded.from.compilation.netapp"/>
-    </javac2>
+    </javac>
     
     <copy todir="${netapp.output.dir}">
       <fileset dir="${module.netapp.basedir}/src">
@@ -192,7 +178,7 @@
     </copy>
   </target>
   
-  <target name="compile.module.netapp.tests" depends="register.custom.compilers,compile.module.netapp.production" description="compile module netapp; test classes" unless="skip.tests"/>
+  <target name="compile.module.netapp.tests" depends="compile.module.netapp.production" description="compile module netapp; test classes" unless="skip.tests"/>
   
   <target name="clean.module.netapp" description="cleanup module">
     <delete dir="${netapp.output.dir}"/>
